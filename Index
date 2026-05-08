@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nieuw Artikel Formulier</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: #fff;
+      color: #E30613;
+      padding: 25px;
+      text-align: center;
+      border-bottom: 3px solid #E30613;
+      position: relative;
+    }
+
+    .header-lastmod {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 11px;
+      color: #888;
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    .header h1 { font-size: 27.3px; margin-bottom: 4px; color: #000; }
+    .header .subtitle { font-size: 13px; color: #666; }
+
+    .btn-pallet {
+      padding: 8px 18px;
+      background: transparent;
+      border: 2px solid #E30613;
+      border-radius: 6px;
+      color: #E30613;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      flex: none;
+      min-width: unset;
+    }
+    .btn-pallet:hover { background: #E30613; color: #fff; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+      width: 340px;
+      max-width: 92vw;
+      overflow: hidden;
+      animation: popIn .2s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(.92); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .modal-header {
+      background: #E30613;
+      color: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; margin: 0; }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+      flex: none;
+      min-width: unset;
+      transition: opacity .2s;
+    }
+    .modal-close:hover { opacity: .7; }
+
+    .modal-body { padding: 12px 16px 16px; }
+
+    .pallet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .pallet-table thead tr { background: #f4f4f4; }
+    .pallet-table th {
+      padding: 6px 12px;
+      text-align: left;
+      font-weight: 700;
+      color: #333;
+      border-bottom: 2px solid #E30613;
+      font-size: 12px;
+    }
+    .pallet-table td {
+      padding: 5px 12px;
+      border-bottom: 1px solid #eee;
+      color: #222;
+    }
+    .pallet-table tbody tr:last-child td { border-bottom: none; }
+    .pallet-table tbody tr:hover { background: #fff5f5; }
+    .pallet-table td:last-child { font-weight: 600; color: #E30613; text-align: right; }
+
+    @media print {
+      .modal-overlay { display: none !important; }
+      .btn-pallet { display: none; }
+    }
+
+    .form-content { padding: 30px; }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.04);
+      transition: border-color .2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #E30613;
+      box-shadow: 0 0 0 3px rgba(227,6,19,.15);
+    }
+
+    input.invalid, select.invalid { border-color: #c00 !important; }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #E30613;
+      margin: 28px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #E30613;
+    }
+
+    .helper-text { font-size: 12px; color: #666; margin-top: 4px; }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      min-width: 120px;
+    }
+
+    .btn-primary { background: #E30613; color: #fff; }
+    .btn-primary:hover { background: #b00510; }
+    .btn-secondary { background: #f0f0f0; color: #333; }
+    .btn-secondary:hover { background: #e0e0e0; }
+    .btn-print { background: #10b981; color: #fff; }
+    .btn-print:hover { background: #059669; }
+
+    /* Toast melding */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #333;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all .3s ease;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    #toast.success { background: #059669; }
+    #toast.error   { background: #c00; }
+
+    /* ── PRINT STYLES ─────────────────────────────────────── */
+    @media print {
+      @page { size: A4; margin: 12mm 14mm; }
+
+      body { background: #fff; padding: 0; margin: 0; font-size: 10pt; }
+
+      .container {
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+
+      .header {
+        border-bottom: 2px solid #E30613;
+        padding: 12px 14px;
+      }
+      .header h1 { font-size: 18pt; color: #E30613; }
+      .header .subtitle { display: none; }
+
+      .form-content { padding: 14px; }
+
+      .button-group { display: none; }
+
+      #toast { display: none; }
+
+      .form-group { margin-bottom: 12px; page-break-inside: avoid; }
+
+      label {
+        font-size: 9pt;
+        color: #555;
+        margin-bottom: 3px;
+      }
+
+      input, select, textarea {
+        border: 1px solid #aaa;
+        border-radius: 3px;
+        padding: 5px 7px;
+        font-size: 10pt;
+        color: #000;
+        background: #fff;
+        box-shadow: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      /* Lege afdruk: verberg ingevulde waarden via body class */
+      body.print-mode-empty input,
+      body.print-mode-empty select,
+      body.print-mode-empty textarea {
+        color: transparent !important;
+      }
+
+      .section-title {
+        font-size: 11pt;
+        color: #E30613;
+        border-bottom: 1px solid #E30613;
+        margin: 16px 0 10px;
+        padding-bottom: 4px;
+      }
+
+      .helper-text { font-size: 8pt; }
+
+      .form-row { gap: 12px; }
+
+      textarea { resize: none; }
+
+      /* Verberg placeholder-tekst bij afdrukken */
+      input::placeholder,
+      textarea::placeholder {
+        color: transparent !important;
+      }
+    }
+
+    @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="header-lastmod" id="lastMod"></div>
+    <h1>NIEUW ARTIKEL FORMULIER</h1>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+      <button class="btn-pallet" id="btnPallet">📦 Pallet gewichten</button>
+      <button class="btn-pallet" id="btnPrinter">🖨 Welke printer?</button>
+    </div>
+  </div>
+
+  <div class="form-content">
+    <form id="f" autocomplete="off" novalidate>
+
+      <div class="form-group">
+        <label for="d">Datum <span style="color:#c00">*</span></label>
+        <input type="date" id="d" required>
+      </div>
+
+      <div class="form-group">
+        <label for="n">Je naam <span style="color:#c00">*</span></label>
+        <input type="text" id="n" required placeholder="">
+      </div>
+
+      <div class="form-group">
+        <label for="a">Artikelnummer <span style="color:#c00">*</span></label>
+        <input type="text" id="a" required placeholder="bijv. ART-0001">
+      </div>
+
+      <div class="form-group">
+        <label for="se">Scanner eenheid <span style="color:#c00">*</span></label>
+        <select id="se" required>
+          <option value="">—</option>
+          <option value="rol">Rol</option>
+          <option value="sheet">Sheet</option>
+          <option value="box">Box</option>
+          <option value="meters">Meters</option>
+          <option value="kilos">Kilo's</option>
+          <option value="pack">Pack</option>
+        </select>
+      </div>
+
+      <div class="section-title">Verpakking</div>
+      <div class="form-group">
+        <label for="vi">Verpakt in <span style="color:#c00">*</span></label>
+        <select id="vi" required>
+          <option value="">—</option>
+          <option value="doos">Doos</option>
+          <option value="folie">Folie</option>
+          <option value="koker">Koker</option>
+          <option value="box">Box</option>
+        </select>
+      </div>
+
+      <div class="section-title">Afmetingen</div>
+      <div class="form-group">
+        <label for="cf">Collo formaat (L×B×H cm) <span style="color:#c00">*</span></label>
+        <input type="text" id="cf" required placeholder="bijv. 40×30×25">
+        <div class="helper-text">Let op: Bij een koker de diameter noteren</div>
+      </div>
+      <div class="form-group">
+        <label for="pf">Volle pallet (L×B×H cm)</label>
+        <input type="text" id="pf" placeholder="120×80×140">
+      </div>
+
+      <div class="section-title">Pallet informatie</div>
+      <div class="form-group">
+        <label for="vp">Volume op pallet</label>
+        <input type="number" id="vp" min="0" placeholder="bijv. 48">
+      </div>
+      <div class="form-group">
+        <label for="st">Stapelbaar</label>
+        <input type="text" id="st" placeholder="3 lagen / 4 per laag">
+      </div>
+      <div class="form-group">
+        <label for="cr">Cradles</label>
+        <select id="cr">
+          <option value="">—</option>
+          <option value="110/3">110/3</option>
+          <option value="120/3">120/3</option>
+          <option value="100/4">100/4</option>
+          <option value="110/4">110/4</option>
+          <option value="120/4">120/4</option>
+          <option value="100/5">100/5</option>
+          <option value="110/5">110/5</option>
+          <option value="120/5">120/5</option>
+          <option value="110/6">110/6</option>
+          <option value="120/6">120/6</option>
+          <option value="120/7">120/7</option>
+        </select>
+      </div>
+
+      <div class="section-title">Gewicht</div>
+      <div class="form-group">
+      <div class="form-row" style="margin-bottom:0">
+        <div class="form-group" style="margin-bottom:0">
+          <label for="cg">Colli gewicht (kg) <span style="color:#c00">*</span></label>
+          <input type="number" step="0.01" min="0" id="cg" required placeholder="0.00">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label for="pg">Pallet gewicht (kg)</label>
+          <input type="number" step="0.01" min="0" id="pg" placeholder="0.00">
+        </div>
+      </div>
+      </div>
+
+      <div class="form-group">
+        <label for="op">Opmerkingen</label>
+        <textarea id="op" rows="3" placeholder="Vrij tekstveld voor aanvullende info…"></textarea>
+      </div>
+
+      <div class="button-group">
+        <button type="button" class="btn-secondary" id="rst">↺ Reset</button>
+        <button type="button" class="btn-primary"   id="pif">🖨 Afdrukken</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<!-- Printer modal -->
+<div class="modal-overlay" id="printerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🖨 Welke printer?</h2>
+      <button class="modal-close" id="printerModalClose" title="Sluiten">✕</button>
+    </div>
+    <div class="modal-body">
+      <table class="pallet-table">
+        <thead>
+          <tr>
+            <th>Locatie</th>
+            <th>IP-adres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Ontvangst</td><td>111.111.123</td></tr>
+          <tr><td>Uitgaand</td><td>111.111.456</td></tr>
+          <tr><td>Kantoor</td><td>111.111.789</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="palletModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📦 Pallet gewichten</h2>
+      <button class="modal-close" id="modalClose" title="Sluiten">✕</button>
+    </div>
+    <div class="modal-body">
+      <table class="pallet-table">
+        <thead>
+          <tr>
+            <th>Afmeting (cm)</th>
+            <th>Gewicht</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>80 × 60</td><td>5 kg</td></tr>
+          <tr><td>120 × 80</td><td>10 kg</td></tr>
+          <tr><td>170 × 80</td><td>19 kg</td></tr>
+          <tr><td>170 × 120</td><td>26 kg</td></tr>
+          <tr><td>340 × 25</td><td>13 kg</td></tr>
+          <tr><td>340 × 80</td><td>35 kg</td></tr>
+          <tr><td>340 × 120</td><td>44 kg</td></tr>
+          <tr><td>540 × 50</td><td>27 kg</td></tr>
+          <tr><td>540 × 120</td><td>57 kg</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Veld-IDs (exclusief lastMod) ────────────────────────
+  const FIELD_IDS   = ['d','n','a','se','vi','vp','cf','pf','st','cr','cg','pg','op'];
+  const REQUIRED    = ['d','n','a','se','vi','cf','cg'];
+  const STORAGE_KEY = 'artikel_v2';
+
+  const el  = id => document.getElementById(id);
+  const els = Object.fromEntries(FIELD_IDS.map(id => [id, el(id)]));
+
+  // ── Standaardwaarden ────────────────────────────────────
+  const defaults = {
+    d: new Date().toISOString().slice(0,10),
+    n:'', a:'', se:'', vi:'', vp:'', cf:'', pf:'', st:'', cr:'', cg:'', pg:'', op:''
+  };
+
+  // ── Hulpfuncties ────────────────────────────────────────
+  function setValues(obj) {
+    FIELD_IDS.forEach(k => { if (els[k] && obj[k] !== undefined) els[k].value = obj[k]; });
+  }
+
+  function getValues() {
+    return Object.fromEntries(FIELD_IDS.map(k => [k, els[k].value]));
+  }
+
+  function showToast(msg, type = 'success') {
+    const t = el('toast');
+    t.textContent = msg;
+    t.className   = `show ${type}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = ''; }, 2800);
+  }
+
+  function updateLastMod(ts) {
+    const date = ts ? new Date(ts) : new Date();
+    const d = date.toLocaleDateString('nl-NL', {day:'2-digit', month:'2-digit', year:'numeric'});
+    const t = date.toLocaleTimeString('nl-NL', {hour:'2-digit', minute:'2-digit'});
+    el('lastMod').innerHTML = `Laatste wijziging<br><strong>${d}</strong> ${t}`;
+  }
+
+  // ── Validatie ────────────────────────────────────────────
+  function validate() {
+    let ok = true;
+    FIELD_IDS.forEach(k => els[k].classList.remove('invalid'));
+    REQUIRED.forEach(k => {
+      if (!els[k].value.trim()) { els[k].classList.add('invalid'); ok = false; }
+    });
+    if (els.cg.value && +els.cg.value <= 0) { els.cg.classList.add('invalid'); ok = false; }
+    return ok;
+  }
+
+  function clearValidation() {
+    FIELD_IDS.forEach(k => els[k].classList.remove('invalid'));
+  }
+
+  // ── Opslaan ──────────────────────────────────────────────
+  function save() {
+    if (!validate()) { showToast('Vul alle verplichte velden in', 'error'); return; }
+    const payload = { values: getValues(), savedAt: Date.now() };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      updateLastMod(payload.savedAt);
+      showToast('✓ Opgeslagen');
+    } catch(e) {
+      showToast('Opslaan mislukt', 'error');
+    }
+  }
+
+  // ── Laden vanuit localStorage ────────────────────────────
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const { values, savedAt } = JSON.parse(raw);
+      setValues(values);
+      updateLastMod(savedAt);
+      return true;
+    } catch(e) { return false; }
+  }
+
+  // ── Print ingevuld ───────────────────────────────────────
+  function printFilled() {
+    document.body.classList.remove('print-mode-empty');
+    window.print();
+  }
+
+  // ── Print leeg ───────────────────────────────────────────
+  function printEmpty() {
+    document.body.classList.add('print-mode-empty');
+    window.print();
+    window.addEventListener('afterprint', () => {
+      document.body.classList.remove('print-mode-empty');
+    }, { once: true });
+  }
+
+  // ── Reset ────────────────────────────────────────────────
+  function reset() {
+    if (!confirm('Formulier resetten? Niet-opgeslagen wijzigingen gaan verloren.')) return;
+    setValues(defaults);
+    clearValidation();
+    el('lastMod').innerHTML = '';
+  }
+
+  // ── Barcode scanner ondersteuning (Memor12 / HID-keyboard) ──
+  // De Memor12 gedraagt zich als een USB/BT-toetsenbord:
+  // de browser vult het gefocuste veld zelf in via keypress-events.
+  // Wij hoeven dus NIET zelf te bufferen — de tekens staan al in
+  // het veld. Wij detecteren alleen de afsluitende Enter en meten
+  // hoe snel de vorige tekens binnenkwamen om scan van handmatig
+  // typen te onderscheiden.
+
+  let lastInputTime = 0;
+
+  // Bijhouden wanneer het laatste teken werd ingetypt
+  document.addEventListener('keydown', e => {
+    const active = document.activeElement;
+    if (!active || !['INPUT','TEXTAREA'].includes(active.tagName)) return;
+    if (e.key.length === 1) lastInputTime = Date.now();
+  });
+
+  // Bij Enter: was dit een scan of handmatig typen?
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const active = document.activeElement;
+    if (!active || !['INPUT','TEXTAREA'].includes(active.tagName)) return;
+
+    const timeSinceLast = Date.now() - lastInputTime;
+    const value = active.value.trim();
+
+    // Scan herkend: veld heeft inhoud én Enter volgt snel na laatste teken
+    if (value.length >= 3 && timeSinceLast < 200) {
+      e.preventDefault();
+      active.dispatchEvent(new Event('input',  { bubbles: true }));
+      active.dispatchEvent(new Event('change', { bubbles: true }));
+      active.classList.remove('invalid');
+
+      // Ga naar het volgende invulveld
+      const inputs = Array.from(
+        document.querySelectorAll('input:not([type=hidden]), select, textarea')
+      ).filter(f => !f.disabled && !f.readOnly);
+      const idx = inputs.indexOf(active);
+      if (idx >= 0 && idx < inputs.length - 1) inputs[idx + 1].focus();
+    }
+  }, true); // capture=true zodat dit vóór andere handlers vuurt
+
+  // ── Event listeners ──────────────────────────────────────
+  el('rst').addEventListener('click', reset);
+  el('pif').addEventListener('click', printFilled);
+
+  // Pallet modal
+  const palletModal = el('palletModal');
+  el('btnPallet').addEventListener('click', () => palletModal.classList.add('open'));
+  el('modalClose').addEventListener('click', () => palletModal.classList.remove('open'));
+  palletModal.addEventListener('click', e => { if (e.target === palletModal) palletModal.classList.remove('open'); });
+
+  // Printer modal
+  const printerModal = el('printerModal');
+  el('btnPrinter').addEventListener('click', () => printerModal.classList.add('open'));
+  el('printerModalClose').addEventListener('click', () => printerModal.classList.remove('open'));
+  printerModal.addEventListener('click', e => { if (e.target === printerModal) printerModal.classList.remove('open'); });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      palletModal.classList.remove('open');
+      printerModal.classList.remove('open');
+    }
+  });
+
+  // Verwijder rood kader zodra gebruiker begint te typen
+  FIELD_IDS.forEach(k => {
+    els[k].addEventListener('input', () => els[k].classList.remove('invalid'));
+    els[k].addEventListener('change', () => els[k].classList.remove('invalid'));
+  });
+
+  // ── Init ─────────────────────────────────────────────────
+  if (!load()) setValues(defaults);
+</script>
+</body>
+</html>
